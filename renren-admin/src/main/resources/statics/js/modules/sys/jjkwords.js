@@ -9,7 +9,7 @@ $(function () {
 			{ label: '创建人', name: 'createby', index: 'createBy', width: 80 },
 			{ label: '状态', name: 'typeStr', index: 'type', width: 80 },
 			{ label: '节点', name: 'nodeName', index: 'type', width: 80 },
-            { label: '操作', name: 'typeStr', index: 'state', width: 50, edittype:"button", formatter: cmgStateFormat},
+            { label: '操作', name: 'typeStr', index: 'state', width: 150, edittype:"button", formatter: cmgStateFormat},
             { label: '操作', name: 'processId', index: 'state', width: 50, edittype:"button",hidden:true}
         ],
 		viewrecords: true,
@@ -41,8 +41,8 @@ $(function () {
     });
     function cmgStateFormat(cellValue,grid, rows, state) {
         var processId=rows["processId"];
-        if (cellValue == "待审核") {
-            return "<button class='btn btn-primary'  onclick=\"firstSend('"  + processId + "','"+rows.id+"')\">首迎送审</button>"
+        if (cellValue == "未提交") {
+            return "<button class='btn btn-primary'  onclick=\"firstSend('"  + processId + "','"+rows.id+"')\" style='margin-left: 10px'>首迎送审</button> "
                 +"<button class='btn btn-warning ' onclick=\"secondSend('"  +  processId + "','"+rows.id+"')\">修改后审批</button>";
         }
         else if(cellValue == "失败")

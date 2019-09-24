@@ -21,13 +21,18 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.impl.util.CollectionUtil;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service("jjkWordsService")
@@ -49,63 +54,90 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
-        params.put("createBy", ShiroUtils.getUserEntity().getUsername());
-        IPage<JjkWordsEntity> page = this.page(
-                new Query<JjkWordsEntity>().getPage(params),
-                new QueryWrapper<JjkWordsEntity>()
-        );
-        PageUtils pageUtils = new PageUtils(page);
-        if(CollectionUtils.isNotEmpty(pageUtils.getList())){
-            List<JjkWordsEntity> list = (List<JjkWordsEntity>) pageUtils.getList();
-            List<JjkActFeignEntity> arrayList = jjkActFeignService.list();
-            for (JjkWordsEntity jjkWordsEntity : list) {
-                String id = jjkWordsEntity.getId();
-                JjkActFeignEntity jjkActFeignEntity = arrayList.stream().filter(eo -> id.equals(eo.getWordsId()+"")).findFirst().get();
-                Task taskQuery = taskService.createTaskQuery().processInstanceId(jjkActFeignEntity.getActProcessId()).singleResult();
-                //  name 和 委托角色
-                String assignee = taskQuery.getAssignee();
-                String name = taskQuery.getName();
-                jjkWordsEntity.setProcessId(jjkActFeignEntity.getActProcessId());
-                jjkWordsEntity.setNodeName("组:"+assignee+";"+"任务："+name);
-                switch (jjkWordsEntity.getType()){
-                    case 0:
-                        jjkWordsEntity.setTypeStr("未提交");
-                        break;
-                    case 1:
-                        jjkWordsEntity.setTypeStr("待审核");
-                        break;
-                    case 2:
-                        jjkWordsEntity.setTypeStr("一级审核成功");
-                        break;
-                    case 3:
-                        jjkWordsEntity.setTypeStr("审核完成");
-                        break;
-                }
-            }
-
+        String username = ShiroUtils.getUserEntity().getUsername();
+        List<Long> longs = sysUserRoleService.queryRoleIdList(ShiroUtils.getUserEntity().getUserId());
+        ArrayList<String> strings = new ArrayList<>();
+        for (Long aLong : longs) {
+            strings.add(aLong+"");
         }
+        //只能本人查自己创建的单子 采购经理看的是发给他的单子
 
+
+        PageUtils pageUtils=null;
+        List<Task> tasks = null;
+        System.out.println("tasks = " + longs);
+        if(!longs.isEmpty()){
+           tasks = taskService.createTaskQuery().taskAssigneeIds(strings).orderByTaskCreateTime().desc().listPage(Integer.valueOf(params.get("page")+"")-1,Integer.valueOf(params.get("limit")+""));
+        }
+        if(CollectionUtil.isNotEmpty(tasks)){
+            QueryWrapper<JjkWordsEntity> jjkWordsEntityQueryWrapper = new QueryWrapper<>();
+            jjkWordsEntityQueryWrapper.in("id",tasks.stream().map(Task::getDescription).collect(Collectors.toList()));
+            IPage<JjkWordsEntity> page = this.page(
+                    new Query<JjkWordsEntity>().getPage(params),
+                    jjkWordsEntityQueryWrapper
+            );
+            pageUtils = new PageUtils(page);
+        }else {
+            QueryWrapper<JjkWordsEntity> jjkWordsEntityQueryWrapper = new QueryWrapper<>();
+            jjkWordsEntityQueryWrapper.eq("createBy",username);
+            IPage<JjkWordsEntity> page = this.page(
+                    new Query<JjkWordsEntity>().getPage(params),
+                    jjkWordsEntityQueryWrapper
+            );
+             pageUtils = new PageUtils(page);
+
+            if(CollectionUtils.isNotEmpty(pageUtils.getList())){
+                List<JjkWordsEntity> list = (List<JjkWordsEntity>) pageUtils.getList();
+
+
+                for (JjkWordsEntity jjkWordsEntity : list) {
+                    String id = jjkWordsEntity.getId();
+                    System.out.println("id = " + id);
+                    Task taskQuery =  taskService.createTaskQuery().taskDescription(id).singleResult();
+                    //  name 和 委托角色
+                    String assignee = taskQuery.getAssignee();
+                    String name = taskQuery.getName();
+                    jjkWordsEntity.setNodeName("组:"+assignee+";"+"任务："+name +"备注"+taskQuery.getDescription());
+                    switch (jjkWordsEntity.getType()){
+                        case 0:
+                            jjkWordsEntity.setTypeStr("未提交");
+                            break;
+                        case 1:
+                            jjkWordsEntity.setTypeStr("待审核");
+                            break;
+                        case 2:
+                            jjkWordsEntity.setTypeStr("一级审核成功");
+                            break;
+                        case 3:
+                            jjkWordsEntity.setTypeStr("审核完成");
+                            break;
+                    }
+                }
+                return pageUtils;
+
+            }
+        }
         return pageUtils;
+
+
     }
+
+
 
     @Override
     public boolean save(JjkWordsEntity entity) {
         SysUserEntity userEntity = ShiroUtils.getUserEntity();
         List<Long> longs = sysUserRoleService.queryRoleIdList(userEntity.getUserId());
         entity.setCreateby(userEntity.getUsername());
-
-        StartProcessPayload build = ProcessPayloadBuilder
-                .start().withProcessDefinitionKey("myProcess_1")
-                .withVariable("userId", longs.get(0))
-                .build();
         //提交的状态
         entity.setType(0);
-        ProcessInstance start = processRuntime.start(build);
         boolean save = super.save(entity);
-        JjkActFeignEntity entityTwo = new JjkActFeignEntity();
-        entityTwo.setWordsId(Integer.valueOf(entity.getId()));
-        entityTwo.setActProcessId(start.getId());
-        jjkActFeignService.save(entityTwo);
+        StartProcessPayload build = ProcessPayloadBuilder
+                .start().withProcessDefinitionKey("myProcess_1")
+                .withVariable("userId",userEntity.getUserId())
+                .withVariable("reson",entity.getId())
+                .build();
+        ProcessInstance start = processRuntime.start(build);
         return save;
     }
 
@@ -128,11 +160,11 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
         Task task = taskService.createTaskQuery()//创建查询对象
                 .processInstanceId(processId)//通过流程实例id来查询当前任务
                 .singleResult();//获取单个查询结果
-
+        List<Long> longs = sysUserRoleService.queryRoleIdList(ShiroUtils.getUserEntity().getUserId());
         //填写完之后，给下个审批人赋值
         Map<String, Object> val = new HashMap<>();
-        val.put("reson", "zzzzzzzzzzzzzzzz");
-        val.put("auditorId", ShiroUtils.getUserEntity().getUsername());
+        val.put("resonTwo", id);
+        val.put("auditorId", task.getAssignee());
         //执行任务
         taskService.complete(task.getId(), val);
         //可以设置成写死的角色id  可给该角色下的所有用户发送邮件 审批   由于 我写的内存验证，就省略了 可以写成查表的
@@ -143,22 +175,28 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
         }
     }
 
+    /**
+     * 首营送审
+     * @param processId
+     * @param id
+     */
     @Override
     public void firstSend(String processId, String id) {
         JjkWordsEntity byId = getById(id);
         byId.setType(1);
         updateById(byId);
         Task task = taskService.createTaskQuery()//创建查询对象
-                .processInstanceId(processId)//通过流程实例id来查询当前任务
+                .taskDescription(id)//通过流程实例id来查询当前任务
                 .singleResult();//获取单个查询结果
+        List<Long> longs = sysUserRoleService.queryRoleIdList(ShiroUtils.getUserEntity().getUserId());
 
         //填写完之后，给下个审批人赋值
         Map<String, Object> val = new HashMap<>();
-        val.put("reson", "zzzzzzzzzzzzzzzz");
-        val.put("auditorId", ShiroUtils.getUserEntity().getUsername());
+        val.put("resonTwo", id);
+        val.put("auditorId", task.getAssignee());
         //执行任务
         taskService.complete(task.getId(), val);
-        //可以设置成写死的角色id  可给该角色下的所有用户发送邮件 审批   由于 我写的内存验证，就省略了 可以写成查表的
+        //可以设置成写死的角色id  可给该角色下的所有用户发送邮件 审批   由于 我写的内存验证，就省略了 可以写成查表的1
         try {
             EmailUtil.sendMessage("首迎送审开始");
         } catch (GeneralSecurityException e) {

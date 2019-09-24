@@ -119,4 +119,92 @@ public class Constant {
         }
     }
 
+
+
+
+    /**
+     * 按钮
+     */
+    public enum Buttons {
+        /**
+         * 查看
+         */
+        LOOK_BTN(1),
+        /**
+         * c添加
+         */
+        ADD_BTN(2),
+        /**
+         * 修改
+         */
+        UPDATE_BTN(3),
+        /**
+         * approval
+         */
+        APPROVAL_BTN(4),
+        /**
+         * 采购经理审批
+         */
+        BUY_APPROVAL_BTN(5),
+        /**
+         * approval
+         */
+       UPDATE_APPROVAL_BTN(6);
+        private int value;
+
+        Buttons(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
+
+    /**
+     * 按钮
+     */
+    public enum RoleButtonEnum {
+        /**
+         * 采购员
+         */
+
+        BUYER(1l,new Buttons[]{Buttons.LOOK_BTN,Buttons.ADD_BTN,Buttons.UPDATE_BTN,Buttons.APPROVAL_BTN,Buttons.UPDATE_APPROVAL_BTN}),
+        /**
+         * 采购组长
+         */
+
+        BUYER_HEADMAN(2l,new Buttons[]{Buttons.APPROVAL_BTN,Buttons.UPDATE_APPROVAL_BTN}),
+        /**
+         * 财务
+         */
+        FINANCIAL_BTN(3l,new Buttons[]{Buttons.APPROVAL_BTN,Buttons.UPDATE_APPROVAL_BTN});
+
+        private long roleId;
+        private Buttons[] buttons;
+
+        RoleButtonEnum(long roleId, Buttons[] buttons) {
+            this.roleId = roleId;
+            this.buttons = buttons;
+        }
+
+        public long getRoleId() {
+            return roleId;
+        }
+
+        public void setRoleId(long roleId) {
+            this.roleId = roleId;
+        }
+
+        public Buttons[] getButtons() {
+            return buttons;
+        }
+
+        public void setButtons(Buttons[] buttons) {
+            this.buttons = buttons;
+        }
+    }
+
+
 }

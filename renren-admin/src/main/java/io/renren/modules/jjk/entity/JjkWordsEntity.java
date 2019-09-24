@@ -49,4 +49,7 @@ public class JjkWordsEntity implements Serializable {
 
 	@TableField(exist = false)
 	private String processId;
+
+	@TableField(exist = false)
+	private String buttonIds;
 }
