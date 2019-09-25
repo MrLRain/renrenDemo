@@ -204,6 +204,17 @@ public class Constant {
         public void setButtons(Buttons[] buttons) {
             this.buttons = buttons;
         }
+        public static RoleButtonEnum swtichRoleId(String  roleId){
+            switch (roleId){
+                case "1":
+                    return BUYER;
+                case "2":
+                    return BUYER_HEADMAN;
+                case "3":
+                    return FINANCIAL_BTN;
+            }
+            return null;
+        }
     }
 
 

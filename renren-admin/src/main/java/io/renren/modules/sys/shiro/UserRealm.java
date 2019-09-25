@@ -47,7 +47,6 @@ public class UserRealm extends AuthorizingRealm {
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		SysUserEntity user = (SysUserEntity)principals.getPrimaryPrincipal();
 		Long userId = user.getUserId();
-		
 		List<String> permsList;
 		
 		//系统管理员，拥有最高权限

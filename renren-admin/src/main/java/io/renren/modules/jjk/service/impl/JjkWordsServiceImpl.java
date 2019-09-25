@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import io.renren.common.utils.EmailUtil;
-import io.renren.common.utils.PageUtils;
-import io.renren.common.utils.ProcessRuntimeImpl;
-import io.renren.common.utils.Query;
+import io.renren.common.utils.*;
 import io.renren.modules.jjk.dao.JjkWordsDao;
 import io.renren.modules.jjk.entity.JjkWordsEntity;
 import io.renren.modules.jjk.service.JjkWordsService;
@@ -65,9 +62,16 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
 
         PageUtils pageUtils=null;
         List<Task> tasks = null;
-        System.out.println("tasks = " + longs);
+        int[] buttonArray =null;
         if(!longs.isEmpty()){
-           tasks = taskService.createTaskQuery().taskAssigneeIds(strings).orderByTaskCreateTime().desc().listPage(Integer.valueOf(params.get("page")+"")-1,Integer.valueOf(params.get("limit")+""));
+            Constant.RoleButtonEnum roleButtonEnum = Constant.RoleButtonEnum.swtichRoleId(strings.get(0));
+            Constant.Buttons[] buttons = roleButtonEnum.getButtons();
+            buttonArray = new int[buttons.length];
+            for (int i = 0; i <buttons.length ; i++) {
+                Constant.Buttons button = buttons[i];
+                buttonArray[i] = button.getValue();
+            }
+            tasks = taskService.createTaskQuery().taskAssigneeIds(strings).orderByTaskCreateTime().desc().listPage(Integer.valueOf(params.get("page")+"")-1,Integer.valueOf(params.get("limit")+""));
         }
         if(CollectionUtil.isNotEmpty(tasks)){
             QueryWrapper<JjkWordsEntity> jjkWordsEntityQueryWrapper = new QueryWrapper<>();
@@ -98,6 +102,7 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
                     String assignee = taskQuery.getAssignee();
                     String name = taskQuery.getName();
                     jjkWordsEntity.setNodeName("组:"+assignee+";"+"任务："+name +"备注"+taskQuery.getDescription());
+                    jjkWordsEntity.setButtonIds(buttonArray);
                     switch (jjkWordsEntity.getType()){
                         case 0:
                             jjkWordsEntity.setTypeStr("未提交");

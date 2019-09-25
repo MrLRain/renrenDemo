@@ -46,7 +46,6 @@ public class JjkWordsController {
     @RequiresPermissions("sys:jjkwords:info")
     public R info(@PathVariable("id") String id){
         JjkWordsEntity jjkWords = jjkWordsService.getById(id);
-
         return R.ok().put("jjkWords", jjkWords);
     }
 

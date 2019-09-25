@@ -49,7 +49,7 @@ $(function () {
         {
             return "<button class='btn btn-default' onclick=\"secondSend('"  +   rows.id + "','\"+processId+\"')\">修改后审批</button>";
         }else {
-            return "<button class='btn btn-default' onclick=\"lookAt('"  +   rows.id + "')\">查看</button>";
+            return "<button class='btn btn-default' onclick=\"vm.getInfo('"  +   rows.id + "')\">查看</button>";
         }
     }
 });
