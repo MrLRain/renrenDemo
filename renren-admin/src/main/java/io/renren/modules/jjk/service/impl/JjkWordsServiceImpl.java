@@ -97,7 +97,7 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
                 for (JjkWordsEntity jjkWordsEntity : list) {
                     String id = jjkWordsEntity.getId();
                     System.out.println("id = " + id);
-                    Task taskQuery =  taskService.createTaskQuery().taskDescription(id).singleResult();
+                    Task taskQuery =  taskService.createTaskQuery().task(id).singleResult();
                     //  name 和 委托角色
                     String assignee = taskQuery.getAssignee();
                     String name = taskQuery.getName();
