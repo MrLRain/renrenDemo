@@ -109,7 +109,7 @@ CREATE TABLE sys_log (
   create_date timestamp,
   PRIMARY KEY (id)
 );
-
+isogeny_mnicode
 -- 文件上传
 CREATE TABLE sys_oss (
   id NUMBER(20, 0) NOT NULL,
