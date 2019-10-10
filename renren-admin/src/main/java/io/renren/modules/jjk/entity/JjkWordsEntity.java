@@ -51,5 +51,5 @@ public class JjkWordsEntity implements Serializable {
 	private String processId;
 
 	@TableField(exist = false)
-	private int[] buttonIds;
+	private String buttonIds;
 }

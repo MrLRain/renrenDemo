@@ -58,19 +58,10 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
             strings.add(aLong+"");
         }
         //只能本人查自己创建的单子 采购经理看的是发给他的单子
-
-
         PageUtils pageUtils=null;
         List<Task> tasks = null;
         int[] buttonArray =null;
         if(!longs.isEmpty()){
-            Constant.RoleButtonEnum roleButtonEnum = Constant.RoleButtonEnum.swtichRoleId(strings.get(0));
-            Constant.Buttons[] buttons = roleButtonEnum.getButtons();
-            buttonArray = new int[buttons.length];
-            for (int i = 0; i <buttons.length ; i++) {
-                Constant.Buttons button = buttons[i];
-                buttonArray[i] = button.getValue();
-            }
             tasks = taskService.createTaskQuery().taskAssigneeIds(strings).orderByTaskCreateTime().desc().listPage(Integer.valueOf(params.get("page")+"")-1,Integer.valueOf(params.get("limit")+""));
         }
         if(CollectionUtil.isNotEmpty(tasks)){
@@ -97,12 +88,12 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
                 for (JjkWordsEntity jjkWordsEntity : list) {
                     String id = jjkWordsEntity.getId();
                     System.out.println("id = " + id);
-                    Task taskQuery =  taskService.createTaskQuery().task(id).singleResult();
+                    Task taskQuery =  taskService.createNativeTaskQuery().sql("select * from ACT_RU_TASK  where DESCRIPTION_ like '%48%'").singleResult();
                     //  name 和 委托角色
-                    String assignee = taskQuery.getAssignee();
+                    String  assignee = taskQuery.getAssignee();
                     String name = taskQuery.getName();
                     jjkWordsEntity.setNodeName("组:"+assignee+";"+"任务："+name +"备注"+taskQuery.getDescription());
-                    jjkWordsEntity.setButtonIds(buttonArray);
+                    jjkWordsEntity.setButtonIds(taskQuery.getDescription());
                     switch (jjkWordsEntity.getType()){
                         case 0:
                             jjkWordsEntity.setTypeStr("未提交");
@@ -140,7 +131,7 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
         StartProcessPayload build = ProcessPayloadBuilder
                 .start().withProcessDefinitionKey("myProcess_1")
                 .withVariable("userId",userEntity.getUserId())
-                .withVariable("reson",entity.getId())
+                .withVariable("resonTwo",entity.getId())
                 .build();
         ProcessInstance start = processRuntime.start(build);
         return save;
@@ -169,6 +160,7 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
         //填写完之后，给下个审批人赋值
         Map<String, Object> val = new HashMap<>();
         val.put("resonTwo", id);
+        val.put("fool", true);
         val.put("auditorId", task.getAssignee());
         //执行任务
         taskService.complete(task.getId(), val);
@@ -198,6 +190,7 @@ public class JjkWordsServiceImpl extends ServiceImpl<JjkWordsDao, JjkWordsEntity
         //填写完之后，给下个审批人赋值
         Map<String, Object> val = new HashMap<>();
         val.put("resonTwo", id);
+        val.put("bool", true);
         val.put("auditorId", task.getAssignee());
         //执行任务
         taskService.complete(task.getId(), val);

@@ -1,4 +1,5 @@
 $(function () {
+    var buttons;
     $("#jqGrid").jqGrid({
         url: baseURL + 'sys/jjkwords/list',
         datatype: "json",
@@ -10,7 +11,8 @@ $(function () {
 			{ label: '状态', name: 'typeStr', index: 'type', width: 80 },
 			{ label: '节点', name: 'nodeName', index: 'type', width: 80 },
             { label: '操作', name: 'typeStr', index: 'state', width: 150, edittype:"button", formatter: cmgStateFormat},
-            { label: '操作', name: 'processId', index: 'state', width: 50, edittype:"button",hidden:true}
+            { label: '操作', name: 'processId', index: 'state', width: 50, edittype:"button",hidden:true},
+            { label: '操作', name: 'buttonIds', index: 'buttonIds', width: 50, edittype:"button",hidden:true}
         ],
 		viewrecords: true,
         height: 385,
@@ -33,14 +35,32 @@ $(function () {
             order: "order"
         },
         gridComplete:function(){
-
         	//隐藏grid底部滚动条
         	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
         },
 
     });
+    var buttons="";
     function cmgStateFormat(cellValue,grid, rows, state) {
+
+
         var processId=rows["processId"];
+        buttons = rows["buttonIds"];
+        if(rows["buttonIds"] !==null &&$.parseJSON(rows["buttonIds"]).buttons!=null){
+            // for (var i = 0; i < $.parseJSON(rows["buttonIds"]).buttons.length; i++) {
+                $.each($(".btn"), function(i, n){
+                    for (var i = 0; i < $.parseJSON(rows["buttonIds"]).buttons.length; i++) {
+                        var isHava = (n.text?n.text:n.value).indexOf($.parseJSON(rows["buttonIds"]).buttons[i]);
+                        console.info(isHava===-1);
+                       if(isHava===-1){
+                           $(n).hide();
+                       }
+                    }
+                });
+
+            // }
+        }
+
         if (cellValue == "未提交") {
             return "<button class='btn btn-primary'  onclick=\"firstSend('"  + processId + "','"+rows.id+"')\" style='margin-left: 10px'>首迎送审</button> "
                 +"<button class='btn btn-warning ' onclick=\"secondSend('"  +  processId + "','"+rows.id+"')\">修改后审批</button>";
@@ -52,6 +72,12 @@ $(function () {
             return "<button class='btn btn-default' onclick=\"vm.getInfo('"  +   rows.id + "')\">查看</button>";
         }
     }
+
+
+    console.info(buttons);
+
+
+
 });
 //首迎送审
 function firstSend(processId,id) {
@@ -168,6 +194,13 @@ var vm = new Vue({
 			$.get(baseURL + "sys/jjkwords/info/"+id, function(r){
                 vm.jjkWords = r.jjkWords;
             });
+            if(id == null){
+                return ;
+            }
+            vm.showList = false;
+            vm.title = "查看";
+
+            vm.getInfo(id)
 		},
 		reload: function (event) {
 			vm.showList = true;

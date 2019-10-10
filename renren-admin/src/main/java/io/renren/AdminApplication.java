@@ -8,7 +8,6 @@
 
 package io.renren;
 
-import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import org.activiti.api.process.runtime.connector.Connector;
 import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListener;
@@ -19,7 +18,6 @@ import org.springframework.boot.actuate.autoconfigure.security.servlet.Managemen
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Map;
 

@@ -6,7 +6,7 @@ spring:
       #nullCatalogMeansCurrent=true 不生成 activiti的表的时候 加这个
       url: jdbc:mysql://localhost:3306/renren_security?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
       username: root
-      password: 1111
+      password: root
       initial-size: 10
       max-active: 100
       min-idle: 10

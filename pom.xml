@@ -9,17 +9,17 @@
     <name>renren-security</name>
     <url>https://www.renren.io</url>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.7.RELEASE</version>
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.7.RELEASE</version>
+    </parent>
 
     <modules>
         <module>renren-common</module>
         <module>renren-admin</module>
         <module>renren-api</module>
-		<module>renren-dynamic-datasource</module>
+        <module>renren-dynamic-datasource</module>
         <module>renren-generator</module>
     </modules>
 
