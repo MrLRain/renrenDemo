@@ -1,5 +1,13 @@
+var buttonArr=[];
 $(function () {
-    var buttons;
+    var map = {};
+    var rows={"id":""};
+    map.首营送审="firstSend('"+rows.id+"')";
+    map.修改后审批="secondSend('"+rows.id+"')";
+    map.查看 ="vm.getInfo('"+rows.id+"')";
+    map.通过 ="vm.accpect('"+rows.id+"',true)";
+    map.不通过="vm.accpect('"+rows.id+"',false)";
+
     $("#jqGrid").jqGrid({
         url: baseURL + 'sys/jjkwords/list',
         datatype: "json",
@@ -9,10 +17,11 @@ $(function () {
 			{ label: '年龄', name: 'age', index: 'age', width: 80 },
 			{ label: '创建人', name: 'createby', index: 'createBy', width: 80 },
 			{ label: '状态', name: 'typeStr', index: 'type', width: 80 },
-			{ label: '节点', name: 'nodeName', index: 'type', width: 80 },
+			// { label: '节点', name: 'nodeName', index: 'type', width: 80 },
             { label: '操作', name: 'typeStr', index: 'state', width: 150, edittype:"button", formatter: cmgStateFormat},
-            { label: '操作', name: 'processId', index: 'state', width: 50, edittype:"button",hidden:true},
-            { label: '操作', name: 'buttonIds', index: 'buttonIds', width: 50, edittype:"button",hidden:true}
+            { label: '操作', name: 'buttonIds', index: 'buttonIds', width: 50, edittype:"button",hidden:true},
+            { label: '操作', name: 'assign', index: 'assign', width: 50, edittype:"button",hidden:true},
+            { label: '操作', name: 'roleList', index: 'roleList', width: 50, edittype:"button",hidden:true}
         ],
 		viewrecords: true,
         height: 385,
@@ -35,60 +44,71 @@ $(function () {
             order: "order"
         },
         gridComplete:function(){
+            console.info(buttonArr);
+            $.each($(".btn"), function(i, n){
+                var isHava = buttonArr.toString().indexOf((n.text?n.text:n.value).trim());
+                if(isHava===-1){
+                    $(n).hide();
+                }
+            });
         	//隐藏grid底部滚动条
         	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
         },
 
     });
-    var buttons="";
+
     function cmgStateFormat(cellValue,grid, rows, state) {
+        if(!rows["buttonIds"]) return null;
+        if($.parseJSON(rows["buttonIds"])!=null && $.parseJSON(rows["buttonIds"]).buttons!=null){
+            var buttons = $.parseJSON(rows["buttonIds"]).buttons;
+
+            if(rows["roleList"].toString().indexOf(rows["assign"])!==-1){
+                buttonArr.push(buttons["noun"]);
+                console.info(buttons["noun"]);
+            }
+
+            var buttonList = "";
+            var seeName = "查看";
 
 
-        var processId=rows["processId"];
-        buttons = rows["buttonIds"];
-        if(rows["buttonIds"] !==null &&$.parseJSON(rows["buttonIds"]).buttons!=null){
-            // for (var i = 0; i < $.parseJSON(rows["buttonIds"]).buttons.length; i++) {
-                $.each($(".btn"), function(i, n){
-                    for (var i = 0; i < $.parseJSON(rows["buttonIds"]).buttons.length; i++) {
-                        var isHava = (n.text?n.text:n.value).indexOf($.parseJSON(rows["buttonIds"]).buttons[i]);
-                        console.info(isHava===-1);
-                       if(isHava===-1){
-                           $(n).hide();
-                       }
+            if(buttons.line!=null){
+                for (var i = 0; i < buttons.line.length; i++) {
+                    if(rows["typeStr"]==="未提交" && buttons.line[i]==="修改送审"){
+                        continue;
                     }
-                });
+                    if(rows["typeStr"]!=="未提交" && buttons.line[i]==="首营送审"){
+                        continue;
+                    }
+                    if(map[buttons.line[i]]&&rows["roleList"].toString().indexOf(rows["assign"])!==-1){
 
-            // }
+                      buttonList+=  "<button class='btn btn-primary'  onclick="+map[buttons.line[i]].replace("''",rows["id"])+" style='margin-left: 10px'>"+buttons.line[i]+"</button> "
+                    }else {
+                        buttonList+=  "<button class='btn btn-primary'  onclick="+map["查看"].replace("''",rows["id"])+" style='margin-left: 10px'>"+seeName+"</button> "
+                        break;
+                    }
+                }
+            }
+            return  buttonList;
         }
+        return "";
 
-        if (cellValue == "未提交") {
-            return "<button class='btn btn-primary'  onclick=\"firstSend('"  + processId + "','"+rows.id+"')\" style='margin-left: 10px'>首迎送审</button> "
-                +"<button class='btn btn-warning ' onclick=\"secondSend('"  +  processId + "','"+rows.id+"')\">修改后审批</button>";
-        }
-        else if(cellValue == "失败")
-        {
-            return "<button class='btn btn-default' onclick=\"secondSend('"  +   rows.id + "','\"+processId+\"')\">修改后审批</button>";
-        }else {
-            return "<button class='btn btn-default' onclick=\"vm.getInfo('"  +   rows.id + "')\">查看</button>";
-        }
     }
 
 
-    console.info(buttons);
 
 
 
 });
 //首迎送审
-function firstSend(processId,id) {
+function firstSend(id) {
     alert("firstSend");
     $.ajax({
         type: "POST",
-        url: baseURL + "sys/jjkwords/firstSend?id="+id+"&processId="+processId,
+        url: baseURL + "sys/jjkwords/firstSend?id="+id,
         success: function(r){
             if(r.code === 0){
                 layer.msg("操作成功", {icon: 1});
-                $("#jqGrid").trigger("reloadGrid");1
+                $("#jqGrid").trigger("reloadGrid");
             }else{
                 layer.alert(r.msg);
             }
@@ -96,11 +116,11 @@ function firstSend(processId,id) {
     });
 }
 //修改后审批
-function secondSend(processId,id) {
+function secondSend(id) {
     alert("secondSend");
     $.ajax({
         type: "POST",
-        url: baseURL + "sys/jjkwords/secondSend?id="+id+"&processId="+processId,
+        url: baseURL + "sys/jjkwords/secondSend?id="+id,
         success: function(r){
 
             if(r.code === 0){
@@ -199,8 +219,6 @@ var vm = new Vue({
             }
             vm.showList = false;
             vm.title = "查看";
-
-            vm.getInfo(id)
 		},
 		reload: function (event) {
 			vm.showList = true;
@@ -208,6 +226,17 @@ var vm = new Vue({
 			$("#jqGrid").jqGrid('setGridParam',{ 
                 page:page
             }).trigger("reloadGrid");
+
+		},
+        accpect: function(id,fool){
+            $.post(baseURL + "sys/jjkwords/accpect/"+id+"?fool="+fool, function(r){
+                vm.jjkWords = r.jjkWords;
+                vm.reload();
+            });
+
 		}
+
+
+
 	}
 });

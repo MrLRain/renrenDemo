@@ -6,6 +6,7 @@ import io.renren.modules.jjk.entity.JjkWordsEntity;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,8 +27,14 @@ public interface JjkWordsService extends IService<JjkWordsEntity> {
     @Override
     boolean removeByIds(Collection<? extends Serializable> idList);
 
-    void secondSend(String processId, String id);
+    void secondSend( String id);
 
-    void firstSend(String processId, String id);
+    void firstSend(String id);
+
+    void accpect(String id,boolean fool);
+
+    void deploymentProcessDefinition_classpath();
+
+    List<JjkWordsEntity> approveNotes(String id);
 }
 

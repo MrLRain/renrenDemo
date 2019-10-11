@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 
@@ -16,7 +17,7 @@ import java.io.Serializable;
  */
 @Data
 @TableName("jjk_words")
-public class JjkWordsEntity implements Serializable {
+public class JjkWordsEntity implements Serializable,Cloneable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -52,4 +53,14 @@ public class JjkWordsEntity implements Serializable {
 
 	@TableField(exist = false)
 	private String buttonIds;
+
+	@TableField(exist = false)
+	private String assign;
+	@TableField(exist = false)
+	private List<Long> roleList;
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 }

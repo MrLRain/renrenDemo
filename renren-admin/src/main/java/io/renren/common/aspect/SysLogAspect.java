@@ -8,9 +8,10 @@
 
 package io.renren.common.aspect;
 
-import com.google.gson.Gson;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.renren.common.annotation.SysLog;
 import io.renren.modules.sys.entity.SysLogEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
@@ -80,7 +81,7 @@ public class SysLogAspect {
 		//请求的参数
 		Object[] args = joinPoint.getArgs();
 		try{
-			String params = new Gson().toJson(args[0]);
+			String params = JSONObject.toJSON(args[0]).toString();
 			sysLog.setParams(params);
 		}catch (Exception e){
 

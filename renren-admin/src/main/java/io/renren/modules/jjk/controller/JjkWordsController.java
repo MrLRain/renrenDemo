@@ -24,8 +24,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("sys/jjkwords")
 public class JjkWordsController {
+
+
+
     @Autowired
     private JjkWordsService jjkWordsService;
+
 
     /**
      * 列表
@@ -56,7 +60,6 @@ public class JjkWordsController {
     @RequiresPermissions("sys:jjkwords:save")
     public R save(@RequestBody JjkWordsEntity jjkWords){
         jjkWordsService.save(jjkWords);
-
         return R.ok();
     }
 
@@ -85,24 +88,56 @@ public class JjkWordsController {
 
 
     /**
-     * 删除
+     * 首次审批
      */
     @RequestMapping("/firstSend")
     public R firstSend(String processId,String id){
-        jjkWordsService.firstSend(processId,id);
+        jjkWordsService.firstSend(id);
         return R.ok();
     }
 
 
     /**
-     * 删除
+     * 修改审批
      */
     @RequestMapping("/secondSend")
     public R secondSend(String processId,String id){
-        jjkWordsService.secondSend(processId,id);
+        jjkWordsService.secondSend(id);
         return R.ok();
     }
 
+
+
+
+    /**
+     * 同意
+     */
+    @RequestMapping("/accpect/{id}")
+    public R accpect(@PathVariable String id,boolean fool){
+        jjkWordsService.accpect(id,fool);
+        return R.ok();
+    }
+
+
+    /**
+     * deploymentProcessDefinition_classpath
+     */
+
+    @RequestMapping("/deployment")
+    public R accpect(){
+        jjkWordsService.deploymentProcessDefinition_classpath();
+        return R.ok();
+    }
+
+/**
+     * deploymentProcessDefinition_classpath
+     */
+
+    @RequestMapping("/approveNotes/{id}")
+    public R approveNotes(@PathVariable String id){
+        jjkWordsService.approveNotes(id);
+        return R.ok();
+    }
 
 
 

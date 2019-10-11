@@ -11,7 +11,6 @@ package io.renren.modules.sys.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.gson.Gson;
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.Query;
@@ -19,6 +18,7 @@ import io.renren.modules.sys.dao.SysConfigDao;
 import io.renren.modules.sys.entity.SysConfigEntity;
 import io.renren.modules.sys.redis.SysConfigRedis;
 import io.renren.modules.sys.service.SysConfigService;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,7 +92,7 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigDao, SysConfigEnt
 	public <T> T getConfigObject(String key, Class<T> clazz) {
 		String value = getValue(key);
 		if(StringUtils.isNotBlank(value)){
-			return new Gson().fromJson(value, clazz);
+			return (T) JSONObject.toBean(JSONObject.fromObject(value), clazz);
 		}
 
 		try {

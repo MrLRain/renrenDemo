@@ -168,12 +168,27 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+
+		<resources>
+		<resource>
+			<directory>src/main/resources</directory>
+			<filtering>true</filtering>
+			<excludes>
+				<exclude>/statics/fonts/*.woff</exclude>
+				<exclude>/statics/fonts/*.woff2</exclude>
+				<exclude>/statics/fonts/*.ttf</exclude>
+			</excludes>
+		</resource>
+		<resource>
+			<directory>src/main/resources</directory>
+			<filtering>false</filtering>
+			<includes>
+				<include>/statics/fonts/*.woff</include>
+				<include>/statics/fonts/*.woff2</include>
+				<include>/statics/fonts/*.ttf</include>
+			</includes>
+		</resource>
+		</resources>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
             <plugin>
@@ -195,6 +210,17 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<configuration>
+						<nonFilteredFileExtensions>
+							<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+							<nonFilteredFileExtension>woff</nonFilteredFileExtension>
+							<nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+						</nonFilteredFileExtensions>
+					</configuration>
+				</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
